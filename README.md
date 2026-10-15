@@ -38,6 +38,16 @@ curl 'https://salah.qasra.org/?latitude=26.4499&longitude=74.6399&timezone=Asia/
 
 No API key is required by this endpoint.
 
+## Free to use & attribution
+
+You may use QASRA Salah API **free of charge** in your websites and applications. When displaying information from this API, you must clearly credit **Quran and Sunnah Research Academy, Ajmer** as the provider.
+
+Suggested attribution for your website or application:
+
+> Prayer times and Hijri date information provided by Quran and Sunnah Research Academy, Ajmer (QASRA).
+
+You can link the credit to [QASRA Salah API](https://salah.qasra.org/).
+
 ## Request parameters
 
 | Parameter | Required | Default | Description |
