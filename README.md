@@ -351,12 +351,22 @@ No. It provides estimated Hijri date information. Event lists, holiday announcem
 
 Prayer requests require latitude and longitude. Convert a city name into coordinates in your application before requesting prayer data. Calendar-only requests do not need a location.
 
+## Rate limits
+
+Requests share an allowance of **30 requests per minute per IP address across all endpoints**. Daily lookups, monthly calendars and prayer timetables all use this same allowance. Devices sharing a public IP share the allowance. `OPTIONS` preflight requests are exempt.
+
+Requests exceeding the allowance receive **HTTP 429** with an `error` message and a `Retry-After: 60` header. Wait 60 seconds before retrying. For a higher request limit, email [support@qasra.org](mailto:support@qasra.org).
+
+Limits are enforced per Cloudflare location and are approximate rather than a strict global counter. A higher limit requires an arrangement with the academy; sending an email does not automatically change the allowance.
+
 ## HTTP behavior
 
 | Status | Meaning |
 | --- | --- |
 | `200` | Response generated. Validate inputs and returned values before displaying them. |
 | `400` | Invalid or missing input: coordinates, date, timezone, offset or date selectors. |
+| `429` | The shared per-IP rate limit was exceeded. |
+| `503` | The rate limiting service is unavailable. |
 | `422` | Prayer times are unavailable for the requested location/date. |
 | `500` | An unexpected calculation error occurred. |
 
