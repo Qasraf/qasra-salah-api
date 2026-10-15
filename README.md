@@ -20,6 +20,29 @@ QASRA Salah API is a service by **Quran and Sunnah Research Academy, Ajmer**. On
 | Start and end times for each interval | Hijri month names in English, Urdu and Arabic | JSON responses |
 | Times formatted in your chosen timezone | Weekday names in English and Arabic | Browser access with CORS |
 
+## Find the weekday for a date
+
+**Find which day of the week a past date fell on, or which weekday a future date will fall on.** Supply a valid Gregorian date using the `date` parameter; the response includes its weekday in both English and Arabic, alongside prayer times and estimated Hijri date information.
+
+For example, to look up **15 August 1947**:
+
+```bash
+curl 'https://salah.qasra.org/?latitude=26.4499&longitude=74.6399&timezone=Asia/Kolkata&date=1947-08-15'
+```
+
+Read these fields in the response:
+
+```json
+{
+  "en": "Friday",
+  "ar": "الجمعة"
+}
+```
+
+They are available at `date.hijri.weekday.en` and `date.hijri.weekday.ar`. Despite their location in the response, they describe the **requested Gregorian date**. Coordinates are still required for the API request.
+
+This makes the API useful for historical date lookups, anniversary features and future calendar planning. Use valid dates in `YYYY-MM-DD` format. Historical dates are interpreted using the Gregorian calendar; converting dates from other historical calendar systems is outside this feature. Weekday lookup is separate from the estimated Hijri date.
+
 ## Quick start
 
 **Base URL:** `https://salah.qasra.org/`
