@@ -20,7 +20,9 @@ QASRA Salah API is a service by **Quran and Sunnah Research Academy, Ajmer**. On
 | --- | --- | --- |
 | Hanafi and Shafi in one response | Gregorian date and estimated Hijri date | Simple HTTP GET requests |
 | Start and end times for each interval | Hijri month names in English, Urdu and Arabic | JSON responses |
-| Times formatted in your chosen timezone | Weekday names in English and Arabic | Browser access with CORS |
+| Times formatted in your chosen timezone | Weekday names in English, Urdu and Arabic | Browser access with CORS |
+
+> **Available now:** Calendar-only lookup, monthly calendars and prayer timetables, date ranges, both date formats, Hijri offset rollover and Urdu weekdays. See the [endpoint guide](#calendar-and-timetable-endpoints).
 
 ## What you can build with QASRA
 
@@ -36,10 +38,10 @@ QASRA brings prayer intervals and calendar information together in a single resp
 | Today's date automatically | Omit `date` to use today in the selected timezone. |
 | Historical date lookup | Supply a past Gregorian date to retrieve its estimated Hijri day, month, year and weekday. |
 | Future date lookup | Supply a future Gregorian date to preview its estimated Hijri date and retrieve prayer intervals. |
-| Weekday lookup | Find the weekday for a supplied Gregorian date in English and Arabic. |
+| Weekday lookup | Find the weekday for a supplied Gregorian date in English, Urdu and Arabic. |
 | Three Hijri month languages | English, Urdu and Arabic names plus a numeric month value for your interface. |
 | Timezone selection | Format prayer times in a supplied IANA timezone. Choose the timezone appropriate to the location. |
-| Manual Hijri day adjustment | An optional `offset` for a day-number adjustment when needed. |
+| Manual Hijri day adjustment | An optional `offset` for a Hijri date adjustment when needed. |
 | Browser-ready integration | JSON, CORS support and no API key requirement. |
 | Free website and app usage | Integrate with clear attribution to Quran and Sunnah Research Academy, Ajmer. |
 
@@ -101,7 +103,7 @@ Use valid Gregorian dates in `YYYY-MM-DD` format. These examples demonstrate pas
 
 ## Find the weekday for a date
 
-**Find which day of the week a past date fell on, or which weekday a future date will fall on.** Supply a valid Gregorian date using the `date` parameter; the response includes its weekday in both English and Arabic, alongside prayer times and estimated Hijri date information.
+**Find which day of the week a past date fell on, or which weekday a future date will fall on.** Supply a valid Gregorian date using the `date` parameter; the response includes its weekday in English, Urdu and Arabic, alongside prayer times and estimated Hijri date information.
 
 For example, to look up **15 August 1947**:
 
@@ -114,11 +116,12 @@ Read these fields in the response:
 ```json
 {
   "en": "Friday",
-  "ar": "الجمعة"
+  "ar": "الجمعة",
+  "ur": "جمعہ"
 }
 ```
 
-They are available at `date.hijri.weekday.en` and `date.hijri.weekday.ar`. Despite their location in the response, they describe the **requested Gregorian date**. Coordinates are still required for the API request.
+They are available at `date.hijri.weekday.en`, `date.hijri.weekday.ur` and `date.hijri.weekday.ar`. Despite their location in the response, they describe the **requested Gregorian date**. For a weekday or Hijri-date lookup without coordinates, use `/calendar?date=1947-08-15`. Prayer requests require coordinates.
 
 This makes the API useful for historical date lookups, anniversary features and future calendar planning. Use valid dates in `YYYY-MM-DD` format. Historical dates are interpreted using the Gregorian calendar; converting dates from other historical calendar systems is outside this feature. Weekday lookup is separate from the estimated Hijri date.
 
@@ -138,7 +141,7 @@ To request a particular date:
 curl 'https://salah.qasra.org/?latitude=26.4499&longitude=74.6399&timezone=Asia/Kolkata&date=2026-10-15'
 ```
 
-No API key is required by this endpoint.
+No API key is required. For calendar information without coordinates, try [`/calendar?date=10/04/1994`](https://salah.qasra.org/calendar?date=10%2F04%2F1994).
 
 ## Free to use & attribution
 
@@ -154,17 +157,17 @@ You can link the credit to [QASRA Salah API](https://salah.qasra.org/).
 
 | Parameter | Required | Default | Description |
 | --- | --- | --- | --- |
-| `latitude` | Yes | — | Location latitude in decimal degrees, between -90 and 90. |
-| `longitude` | Yes | — | Location longitude in decimal degrees, between -180 and 180. |
+| `latitude` | Prayer requests | — | Location latitude in decimal degrees, between -90 and 90. |
+| `longitude` | Prayer requests | — | Location longitude in decimal degrees, between -180 and 180. |
 | `timezone` | No | `Asia/Kolkata` | IANA timezone name, such as `Asia/Kolkata`, `Asia/Dubai` or `Europe/London`. |
-| `date` | No | Today in the selected timezone | Gregorian date in `YYYY-MM-DD` format. |
-| `offset` | No | `0` | Integer adjustment to the returned Hijri day number. Does not change prayer times. See [calendar information](#calendar-information). |
+| `date` | No | Today in the selected timezone | Gregorian date in `YYYY-MM-DD` or `DD/MM/YYYY` format. |
+| `offset` | No | `0` | Integer Hijri date adjustment from `-366` to `366`. Does not change prayer times. See [calendar information](#calendar-information). |
 
 Use valid coordinates, dates and timezone names. The coordinate ranges above describe valid input; callers should validate their input before sending a request.
 
 ## Response reference
 
-See the [complete example response](examples/response.json), generated from the local Worker for Ajmer on `2026-10-15` with `Asia/Kolkata` and no Hijri offset. It includes every response field and both sets of prayer intervals.
+See the [complete response example](examples/response.json), verified against the deployed API for Ajmer on `2026-10-15` with `Asia/Kolkata` and no Hijri offset. It includes every response field and both sets of prayer intervals.
 
 Successful requests return a JSON object with these fields:
 
@@ -196,7 +199,7 @@ Read each interval's own `start` and `end`: the end of one interval may differ f
 
 ### Calendar information
 
-Each response includes calendar information for **one requested day**:
+A single-day response includes calendar information in this shape:
 
 ```json
 {
@@ -212,7 +215,8 @@ Each response includes calendar information for **one requested day**:
     "year": "1448",
     "weekday": {
       "en": "Thursday",
-      "ar": "الخميس"
+      "ar": "الخميس",
+      "ur": "جمعرات"
     }
   }
 }
@@ -220,9 +224,9 @@ Each response includes calendar information for **one requested day**:
 
 This is an illustrative `date` object from the current implementation. Hijri dates are estimates and do not constitute a local moon-sighting announcement.
 
-The optional `offset` adds to the Hijri day number only. It does not normalize the Hijri month or year at month boundaries; use it only when the resulting day is appropriate. Weekday fields describe the requested Gregorian date and do not shift with `offset`.
+`offset` shifts the conversion input before estimating the Hijri date, so month and year boundaries are handled. Weekday fields describe the original requested Gregorian date and do not shift with `offset`.
 
-To build a monthly calendar, request each Gregorian date individually. The endpoint does not return a whole month or an Islamic events calendar in one request.
+Use `/calendar?year=2026&month=10` for a whole Gregorian month, or supply `from` and `to` for an inclusive date range. See the [endpoint guide](#calendar-and-timetable-endpoints). Islamic event lists are not returned.
 
 ## JavaScript example
 
@@ -299,7 +303,7 @@ print(data["timings"]["hanafi"]["Fajr"])
 
 ## Build a calendar or prayer timetable
 
-For a month view, request each Gregorian date you want to display, using the same location and timezone. Save each response under its Gregorian date, then use the returned calendar fields and prayer intervals to build your rows or day cards.
+For a month view, use `/calendar?year=2026&month=10`. For prayer intervals as well, use `/timetable` with `year`, `month`, coordinates and timezone. Read the ordered `data` array to build day cards or timetable rows. You can also request an inclusive custom range using `from` and `to`.
 
 | Interface | Response fields to use |
 | --- | --- |
@@ -308,8 +312,8 @@ For a month view, request each Gregorian date you want to display, using the sam
 | Hijri date widget | `date.hijri.day`, `date.hijri.month`, `date.hijri.year` |
 | Historical date explorer | Explicit `date` parameter, then `date.hijri` |
 | Future calendar preview | Explicit future `date`, then calendar fields and prayer intervals |
-| Multilingual calendar heading | `month.en`, `month.ur`, `month.ar`, `weekday.en`, `weekday.ar` |
-| Monthly prayer timetable | One request per Gregorian day, with cached results |
+| Multilingual calendar heading | `month.en`, `month.ur`, `month.ar`, `weekday.en`, `weekday.ur`, `weekday.ar` |
+| Monthly prayer timetable | One monthly `/timetable` request with coordinates |
 
 The API supplies the data; your application handles layouts, reminders, notifications and calendar navigation. It returns formatted time strings rather than timestamps, so date-aware countdowns should account for the timezone and Isha's next-day end.
 
@@ -321,7 +325,7 @@ Yes. Clearly credit Quran and Sunnah Research Academy, Ajmer as the provider. Se
 
 **Can I find the estimated Hijri date for a birthday or another past date?**
 
-Yes. Supply that Gregorian date along with coordinates. The response includes estimated Hijri day, month, year and the Gregorian date's weekday.
+Yes. Supply that Gregorian date to `/calendar`; coordinates are unnecessary unless you also want prayer times. The response includes estimated Hijri day, month, year and the Gregorian date's weekday.
 
 **Can I request a future date?**
 
@@ -337,7 +341,7 @@ No. Coordinates specify the location; timezone controls time formatting and the 
 
 **Does `offset` change prayer timings?**
 
-No. It adjusts only the returned Hijri day number. See its month-boundary behavior in [calendar information](#calendar-information).
+No. It adjusts the estimated Hijri date only. Month and year boundaries are handled; see the endpoint guide below.
 
 **Does it return moon-sighting announcements, Islamic events or holidays?**
 
@@ -345,15 +349,16 @@ No. It provides estimated Hijri date information. Event lists, holiday announcem
 
 **Can I use a city name instead of coordinates?**
 
-The endpoint requires latitude and longitude. Convert a city name into coordinates in your application before requesting data.
+Prayer requests require latitude and longitude. Convert a city name into coordinates in your application before requesting prayer data. Calendar-only requests do not need a location.
 
 ## HTTP behavior
 
 | Status | Meaning |
 | --- | --- |
 | `200` | Response generated. Validate inputs and returned values before displaying them. |
-| `400` | Latitude or longitude is missing or empty. |
-| `500` | A calculation or formatting error occurred, for example an invalid timezone. |
+| `400` | Invalid or missing input: coordinates, date, timezone, offset or date selectors. |
+| `422` | Prayer times are unavailable for the requested location/date. |
+| `500` | An unexpected calculation error occurred. |
 
 Error responses contain an `error` string:
 
@@ -363,9 +368,96 @@ Error responses contain an `error` string:
 }
 ```
 
-Invalid dates or malformed coordinates are not consistently rejected by the current endpoint and may produce invalid values in a `200` response. Integrations should validate input rather than rely on the HTTP status alone.
+Requests are validated before calculation; invalid input returns `400` with an explanatory `error` string.
 
 The API supports browser CORS requests and `OPTIONS` preflight. Successful responses carry a one-day cache policy (`86400` seconds). When requesting today's information, refresh the date at local midnight and include an explicit `date` in the URL so that each day's request has its own cache key.
+
+
+
+## Calendar and timetable endpoints
+
+These endpoints are deployed at `https://salah.qasra.org`. Daily, monthly and ranged responses share the same estimated Hijri calendar fields.
+
+| Endpoint | Response | Coordinates |
+| --- | --- | --- |
+| `/` | Existing daily Hanafi and Shafi prayer intervals plus date information | Required |
+| `/calendar` | Gregorian date, estimated Hijri date and weekday; no prayer timings | Not required |
+| `/timetable` | Hanafi and Shafi prayer intervals plus date information | Required |
+
+All three endpoints accept one of these date selectors:
+
+| Selector | Example | Result |
+| --- | --- | --- |
+| `date` | `date=1994-04-10` or `date=10/04/1994` | One day |
+| `year` and `month` | `year=2028&month=2` | All days in that Gregorian month |
+| `from` and `to` | `from=01/04/2026&to=15/04/2026` | Inclusive date range |
+| No selector | — | Today in the selected timezone |
+
+Do not mix selectors. Both ends of a range are required, as are both year and month for a month request. Date ranges are limited to 366 days. Input dates must be real Gregorian dates in exactly `YYYY-MM-DD` or `DD/MM/YYYY` form; output `date.gregorian` is always normalized to `YYYY-MM-DD`.
+
+The accepted Gregorian year range is `0623`–`9999`. This is an input boundary, not a claim of independently verified historical accuracy across that entire period. Hijri dates retain the existing algorithmic estimation assumptions and are not moon-sighting records.
+
+### Request examples
+
+```text
+/calendar?date=10/04/1994
+/calendar?date=10/04/2030
+/calendar?year=2028&month=2
+/calendar?from=01/04/2026&to=15/04/2026
+/timetable?latitude=26.4499&longitude=74.6399&year=2026&month=10&timezone=Asia/Kolkata
+/timetable?latitude=26.4499&longitude=74.6399&from=2026-12-31&to=2027-01-02
+```
+
+Use `https://salah.qasra.org` as the base URL for these paths. `/` also accepts month and range selectors for integrations that prefer the original path.
+
+### Response shapes
+
+A single-day prayer request preserves the existing response fields and both madhhabs. A single-day calendar response contains `method`, `timezone` and `date`:
+
+```json
+{
+  "method": "Quran and Sunnah Research Academy, Ajmer",
+  "timezone": "Asia/Kolkata",
+  "date": {
+    "gregorian": "1994-04-10",
+    "hijri": {
+      "day": "28",
+      "month": { "number": 10, "en": "Shawwal", "ur": "شوال", "ar": "شوال" },
+      "year": "1414",
+      "weekday": { "en": "Sunday", "ar": "الأحد", "ur": "اتوار" }
+    }
+  }
+}
+```
+
+Month and range requests return an envelope with `method`, `timezone`, `from`, `to`, `count` and `data`. Calendar `data` entries have the shape `{ "date": { ... } }`. Prayer `data` entries are complete daily prayer responses, and the envelope also contains `coordinates`. Dates are ordered from earliest to latest; each appears exactly once. Even a one-day `from`/`to` request returns this batch envelope.
+
+### Hijri offset and Urdu weekdays
+
+`offset` is an integer from `-366` to `366`, default `0`. It shifts the conversion input by that many days before estimating the Hijri date. This allows the estimated Hijri month and year to change at boundaries rather than returning an invalid day number. The existing unadjusted Hijri estimation formula is retained; the result remains an estimate rather than an observational record.
+
+The requested Gregorian date, its weekday and all prayer timings stay unchanged by `offset`. Adjustments that move outside the supported Gregorian years return `400`.
+
+`date.hijri.weekday` now includes Urdu as `ur`, alongside existing `en` and `ar`:
+
+| English | Urdu |
+| --- | --- |
+| Sunday | اتوار |
+| Monday | پیر |
+| Tuesday | منگل |
+| Wednesday | بدھ |
+| Thursday | جمعرات |
+| Friday | جمعہ |
+| Saturday | ہفتہ |
+
+### Validation and HTTP behavior
+
+- Latitude and longitude must be complete decimal numbers in `[-90, 90]` and `[-180, 180]`, respectively, when prayer times are requested.
+- Invalid coordinates, impossible dates, invalid timezones, malformed offsets and invalid date selectors return `400` with an `error` string. Invalid inputs no longer return `200` with `Invalid Date` values.
+- Valid coordinates where the current calculation cannot produce all prayer times (for example polar conditions) return `422` with an explanatory error. A timetable containing an unavailable day fails as a whole; no partial response is returned.
+- Unexpected calculation failures return `500`.
+- CORS, `OPTIONS` preflight, 12-hour time strings and the one-day successful-response cache policy remain available. Error responses are not given that cache policy.
+- Send an explicit date or month/range selector for predictable date-specific caching. Refresh date selectors at local midnight for daily widgets.
 
 ---
 
