@@ -14,11 +14,11 @@ Free to use in your websites and applications with academy attribution.
 
 ---
 
-QASRA Salah API is a service by **Quran and Sunnah Research Academy, Ajmer**. One request returns prayer intervals for both Hanafi and Shafi, alongside Gregorian and estimated Hijri date information for your selected location and date.
+QASRA Salah API is a service by **Quran and Sunnah Research Academy, Ajmer**. One request returns prayer intervals for both Hanafi and Jumhur, alongside Gregorian and estimated Hijri date information for your selected location and date.
 
 | Prayer times | Calendar information | Integration |
 | --- | --- | --- |
-| Hanafi and Shafi in one response | Gregorian date and estimated Hijri date | Simple HTTP GET requests |
+| Hanafi and Jumhur in one response | Gregorian date and estimated Hijri date | Simple HTTP GET requests |
 | Start and end times for each interval | Hijri month names in English, Urdu and Arabic | JSON responses |
 | Times formatted in your chosen timezone | Weekday names in English, Urdu and Arabic | Browser access with CORS |
 
@@ -26,12 +26,12 @@ QASRA Salah API is a service by **Quran and Sunnah Research Academy, Ajmer**. On
 
 ## What you can build with QASRA
 
-QASRA brings prayer intervals and calendar information together in a single response. Use it to create a daily prayer dashboard, add an Islamic date widget to a website, show both madhhabs in a mobile application, or let visitors explore dates from the past and future.
+QASRA brings prayer intervals and calendar information together in a single response. Use it to create a daily prayer dashboard, add an Islamic date widget to a website, show both calculation options in a mobile application, or let visitors explore dates from the past and future.
 
 | Feature | What your users get |
 | --- | --- |
 | Location-based prayer information | Prayer intervals for the supplied latitude, longitude and date. No city-name lookup is needed. |
-| Two madhhabs together | Hanafi and Shafi results from one request, ready for a madhhab selector or side-by-side display. |
+| Two Asr calculation options | Hanafi and Jumhur results from one request, ready for a madhhab selector or side-by-side display. |
 | Start and end times | Both boundaries of each interval, so your interface can show a prayer's time window. |
 | Sunrise reference | A separate sunrise entry alongside the five prayer entries. |
 | Overnight Isha interval | Isha's end is calculated using the following morning's Fajr boundary. |
@@ -180,11 +180,11 @@ Successful requests return a JSON object with these fields:
 | `date.gregorian` | Requested Gregorian date, or today's date when omitted. |
 | `date.hijri` | Estimated Hijri day, month, year and weekday information. |
 | `timings.hanafi` | Hanafi prayer intervals. |
-| `timings.shafi` | Shafi prayer intervals. |
+| `timings.jumhur` | Jumhur prayer intervals. |
 
 ### Prayer intervals
 
-Both `timings.hanafi` and `timings.shafi` contain the following entries. Each entry has a `start` and an `end`, formatted as a 12-hour time string such as `5:15 AM`.
+Both `timings.hanafi` and `timings.jumhur` contain the following entries. Each entry has a `start` and an `end`, formatted as a 12-hour time string such as `5:15 AM`.
 
 | Entry | Description |
 | --- | --- |
@@ -252,7 +252,7 @@ const data = await getQasraSalahTimes({
 });
 
 console.log(data.timings.hanafi.Fajr.start);
-console.log(data.timings.shafi.Asr.start);
+console.log(data.timings.jumhur.Asr.start);
 console.log(data.date.hijri.month.ur);
 ```
 
@@ -307,7 +307,7 @@ For a month view, use `/calendar?year=2026&month=10`. For prayer intervals as we
 
 | Interface | Response fields to use |
 | --- | --- |
-| Daily prayer dashboard | `timings.hanafi` or `timings.shafi` |
+| Daily prayer dashboard | `timings.hanafi` or `timings.jumhur` |
 | Madhhab selector | Switch between the two `timings` objects locally. |
 | Hijri date widget | `date.hijri.day`, `date.hijri.month`, `date.hijri.year` |
 | Historical date explorer | Explicit `date` parameter, then `date.hijri` |
@@ -331,7 +331,7 @@ Yes. Supply that Gregorian date to `/calendar`; coordinates are unnecessary unle
 
 Yes. A valid future Gregorian date can be supplied in the same way. Treat its Hijri date as an estimate.
 
-**Do I need to choose Hanafi or Shafi in the request?**
+**Do I need to choose Hanafi or Jumhur in the request?**
 
 No. Both are returned together. Select the appropriate object in your application.
 
@@ -400,9 +400,9 @@ Base URL: `https://salah.qasra.org`. Daily, monthly and ranged responses share t
 
 | Endpoint | Response | Coordinates |
 | --- | --- | --- |
-| `/` | Hanafi and Shafi prayer intervals plus date information | Required |
+| `/` | Hanafi and Jumhur prayer intervals plus date information | Required |
 | `/calendar` | Gregorian date, estimated Hijri date and weekday; no prayer timings | Not required |
-| `/timetable` | Hanafi and Shafi prayer intervals plus date information | Required |
+| `/timetable` | Hanafi and Jumhur prayer intervals plus date information | Required |
 
 All three endpoints accept one of these date selectors:
 
@@ -432,7 +432,7 @@ Use `https://salah.qasra.org` as the base URL for these paths. `/` also accepts 
 
 ### Response shapes
 
-A single-day prayer response contains academy information, coordinates, timezone, calendar information and prayer intervals for both madhhabs. A single-day calendar response contains `method`, `timezone` and `date`:
+A single-day prayer response contains academy information, coordinates, timezone, calendar information and prayer intervals for both calculation options. A single-day calendar response contains `method`, `timezone` and `date`:
 
 ```json
 {
@@ -487,3 +487,9 @@ Month and range requests return an envelope with `method`, `timezone`, `from`, `
 A service by **Quran and Sunnah Research Academy, Ajmer**
 
 </div>
+
+## Hanafi and Jumhur
+
+`timings.hanafi` uses the later Hanafi Asr rule (two shadow lengths beyond the noon shadow). `timings.jumhur` uses the earlier Asr rule followed by the Shafi‘i, Maliki and Hanbali schools (one shadow length beyond the noon shadow). These labels distinguish the Asr calculation; they do not claim to implement every prayer-time difference among these schools. Both options retain the API’s existing calculation settings and adjustments.
+
+The public response key is `jumhur`; no `shafi` compatibility alias is returned.
