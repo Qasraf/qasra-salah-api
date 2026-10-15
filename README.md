@@ -353,11 +353,23 @@ Prayer requests require latitude and longitude. Convert a city name into coordin
 
 ## Rate limits
 
-Requests share an allowance of **30 requests per minute per IP address across all endpoints**. Daily lookups, monthly calendars and prayer timetables all use this same allowance. Devices sharing a public IP share the allowance. `OPTIONS` preflight requests are exempt.
+Every public IP has the following allowance across all Salah API endpoints:
 
-Requests exceeding the allowance receive **HTTP 429** with an `error` message and a `Retry-After: 60` header. Wait 60 seconds before retrying. For a higher request limit, email [support@qasra.org](mailto:support@qasra.org).
+| Window | Requests per IP |
+| --- | ---: |
+| Minute | **60** |
+| Hour | **300** |
+| Day | **500** |
 
-Limits are enforced per Cloudflare location and are approximate rather than a strict global counter. A higher limit requires an arrangement with the academy; sending an email does not automatically change the allowance.
+All three limits apply together. Daily lookups, calendar requests, monthly calendars and prayer timetables share this Salah allowance. A monthly timetable counts as one request, not one request for each returned day. `OPTIONS` preflight is exempt. Requests accepted by the limiter count even if the input is invalid or a result is served from the API's cache.
+
+Minute and hour quotas use fixed windows. The daily allowance resets at **00:00 Asia/Kolkata (India time)**. Devices sharing a public IP share the allowance. Salah and QASRA Geocoder have separate allowances: using one does not consume the other's quota.
+
+When any allowance is exhausted, the API returns **HTTP 429**. Read the `Retry-After` response header for how many seconds to wait; it is not always 60 seconds. An hourly or daily allowance can require a longer wait. Do not immediately repeat a blocked request.
+
+A rate-limit error contains `error`, `exceeded`, `retry_after_seconds` and `timezone`. `exceeded` identifies the exhausted window(s), such as `minute`, `hour` or `day`. If the limiting service is unavailable, the API returns **503** with a retry delay instead of bypassing protection.
+
+Fetch a timetable once and reuse it in your application rather than polling every second. Refresh when its date range or location changes. For a higher allowance, email [support@qasra.org](mailto:support@qasra.org); an email does not automatically change the limit.
 
 ## HTTP behavior
 
