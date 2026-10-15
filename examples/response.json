@@ -1,0 +1,80 @@
+{
+  "method": "Quran and Sunnah Research Academy, Ajmer",
+  "note": "A safety margin is maintained between the end time of one prayer and the start of the next — ensuring your prayer is guaranteed to be on time, regardless of weather and atmospheric conditions.",
+  "coordinates": {
+    "latitude": 26.4499,
+    "longitude": 74.6399
+  },
+  "timezone": "Asia/Kolkata",
+  "date": {
+    "gregorian": "2026-10-15",
+    "hijri": {
+      "day": "3",
+      "month": {
+        "number": 5,
+        "en": "Jamadi al-Awwal",
+        "ur": "جمادی الاولیٰ",
+        "ar": "جمادى الأولى"
+      },
+      "year": "1448",
+      "weekday": {
+        "en": "Thursday",
+        "ar": "الخميس"
+      }
+    }
+  },
+  "timings": {
+    "hanafi": {
+      "Fajr": {
+        "start": "5:15 AM",
+        "end": "6:31 AM"
+      },
+      "Sunrise": {
+        "start": "6:31 AM",
+        "end": "12:18 PM"
+      },
+      "Dhuhr": {
+        "start": "12:19 PM",
+        "end": "4:26 PM"
+      },
+      "Asr": {
+        "start": "4:29 PM",
+        "end": "6:04 PM"
+      },
+      "Maghrib": {
+        "start": "6:09 PM",
+        "end": "7:21 PM"
+      },
+      "Isha": {
+        "start": "7:25 PM",
+        "end": "5:14 AM"
+      }
+    },
+    "shafi": {
+      "Fajr": {
+        "start": "5:15 AM",
+        "end": "6:31 AM"
+      },
+      "Sunrise": {
+        "start": "6:31 AM",
+        "end": "12:18 PM"
+      },
+      "Dhuhr": {
+        "start": "12:19 PM",
+        "end": "3:35 PM"
+      },
+      "Asr": {
+        "start": "3:38 PM",
+        "end": "6:04 PM"
+      },
+      "Maghrib": {
+        "start": "6:09 PM",
+        "end": "7:21 PM"
+      },
+      "Isha": {
+        "start": "7:25 PM",
+        "end": "5:14 AM"
+      }
+    }
+  }
+}
